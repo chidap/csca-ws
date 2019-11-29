@@ -8,6 +8,9 @@ import com.chida.csca.ws.shared.Utils;
 import com.chida.csca.ws.shared.dto.*;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +23,7 @@ public class MemberServiceImpl implements MemberService {
     private MemberRepository memberRepository;
     private LoginRepository loginRepository;
     private Utils utils;
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     /**
      * Constructor
@@ -27,11 +31,13 @@ public class MemberServiceImpl implements MemberService {
 
     public MemberServiceImpl( MemberRepository memberRepository,
                               LoginRepository loginRepository,
-                              Utils utils
+                              Utils utils,
+                              BCryptPasswordEncoder bCryptPasswordEncoder
                              ) {
         this.memberRepository = memberRepository;
         this.loginRepository = loginRepository;
         this.utils = utils;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
     /**
@@ -68,8 +74,7 @@ public class MemberServiceImpl implements MemberService {
         }
 
         MemberLoginDTO loginInfo = member.getMemberLoginInfo();
-        //loginInfo.setEncryptedPassword(bCryptPasswordEncoder.encode(loginInfo.getPassword()));
-        loginInfo.setEncryptedPassword("test");
+        loginInfo.setEncryptedPassword(bCryptPasswordEncoder.encode(loginInfo.getPassword()));
         loginInfo.setMemberDetails(member);
         member.setMemberLoginInfo(loginInfo);
 
@@ -88,5 +93,10 @@ public class MemberServiceImpl implements MemberService {
         MemberDTO returnMemberDTO = modelMapper.map(createdMemberDetails, MemberDTO.class);
 
         return returnMemberDTO;
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
+        return null;
     }
 }
